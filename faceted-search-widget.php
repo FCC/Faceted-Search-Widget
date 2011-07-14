@@ -3,7 +3,7 @@
 Plugin Name: Faceted Search Widget
 Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.0
+Version: 1.1
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2

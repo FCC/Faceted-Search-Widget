@@ -4,7 +4,7 @@ Donate link:
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
 Tested up to: 3.2
-Stable tag: 1.0
+Stable tag: 1.1
 
 Sidebar Widget to allow filtering indexes by builtin and custom taxonomies.
 
@@ -23,6 +23,11 @@ Used for internal FCC project and open sourced July, 2011.
 3. Drag and drop widget into sidebar
 
 == Changelog ==
+
+= 1.1 =
+* Now uses the [Widget API](http://codex.wordpress.org/Widgets_API)
+* Ability to specify widget title
+* Removed trailing whitespace from file
 
 = 1.0 =
 * Initial Release
