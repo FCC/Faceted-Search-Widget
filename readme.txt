@@ -24,6 +24,9 @@ Used for internal FCC project and open sourced July, 2011.
 
 == Changelog ==
 
+= 1.2 =
+* Added support for internationalization of number formatting
+
 = 1.1 =
 * Now uses the [Widget API](http://codex.wordpress.org/Widgets_API)
 * Ability to specify widget title

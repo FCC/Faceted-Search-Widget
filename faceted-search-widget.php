@@ -3,7 +3,7 @@
 Plugin Name: Faceted Search Widget
 Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.1
+Version: 1.2
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2
@@ -34,7 +34,7 @@ class FCC_Refine_Widget extends WP_Widget {
 		global $wp_query;
 		extract( $args ); 
 		
-		$title = apply_filters('widget_title', $instance['title']);
+		$title = apply_filters( 'widget_title', $instance['title'] );
         ?>
 			<?php echo $before_widget; ?>
 				<?php if ( $title )
@@ -71,7 +71,7 @@ class FCC_Refine_Widget extends WP_Widget {
 					if ( !$query->found_posts )
 						continue;		
 					?>
-					<li><a href="<?php echo esc_url( add_query_arg( $tax->query_var, $term->slug) ); ?>"><?php echo $term->name; ?></a> (<?php echo $query->found_posts; ?>)</li>
+					<li><a href="<?php echo esc_url( add_query_arg( $tax->query_var, $term->slug) ); ?>"><?php echo $term->name; ?></a> (<?php echo number_format_i18n( $query->found_posts ); ?>)</li>
 				<?php } ?>
 				</ul>
 			</li>
