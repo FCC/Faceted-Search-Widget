@@ -75,6 +75,3 @@ function fcc_register_widget() {
 
 //hook for register_widget callback
 add_action( 'init', 'fcc_register_widget' );
-
-?>
-
