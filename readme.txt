@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: fcc, benbalter 
+Contributors: fcc
 Donate link: 
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
@@ -23,6 +23,10 @@ Used for internal FCC project and open sourced July, 2011.
 3. Drag and drop widget into sidebar
 
 == Changelog ==
+
+= 1.3 =
+* Added support for hierarchical taxonomies
+* Now relies on wp_list_categories
 
 = 1.2 =
 * Added support for internationalization of number formatting
