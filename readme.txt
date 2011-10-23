@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: fcc, benbalter 
+Contributors: fcc 
 Donate link: 
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
