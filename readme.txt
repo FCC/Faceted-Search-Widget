@@ -3,7 +3,7 @@ Contributors: fcc
 Donate link: 
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
-Tested up to: 3.2
+Tested up to: 3.3
 Stable tag: 1.2
 
 Sidebar Widget to allow filtering indexes by builtin and custom taxonomies.
