@@ -3,8 +3,8 @@ Contributors: fcc
 Donate link: 
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
-Tested up to: 3.3
-Stable tag: 1.2
+Tested up to: 3.4
+Stable tag: 1.4
 
 Sidebar Widget to allow filtering indexes by builtin and custom taxonomies.
 
@@ -23,6 +23,10 @@ Used for internal FCC project and open sourced July, 2011.
 3. Drag and drop widget into sidebar
 
 == Changelog ==
+
+= 1.4 =
+* Fixed bug where post count would not display properly when browsing within a facet
+* More robust handling of queries when filtering by multiple taxonomies
 
 = 1.3 =
 * Added support for hierarchical taxonomies

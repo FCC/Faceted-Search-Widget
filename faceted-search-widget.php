@@ -3,7 +3,7 @@
 Plugin Name: Faceted Search Widget
 Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.3
+Version: 1.4
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2
@@ -43,9 +43,9 @@ class FCC_Refine_Widget extends WP_Widget {
 		$taxs = get_taxonomies( null,  'objects' ); ?>
 		<ul>
 		<?php foreach ($taxs as $tax) { 
-		
+				
 		//If user has already filterd by this taxonomy, do not display
-		if ( $wp_query->get( $tax->name ) != FALSE )
+		if ( $this->tax_in_query( $tax->name ) )
 			continue;
 		
 		//verify taxonomy is public and queryable
@@ -78,7 +78,7 @@ class FCC_Refine_Widget extends WP_Widget {
 	 * Function to process changes to the widge title
 	 * @param array $old the old title
 	 * @param array $new the new title
-	 * @returns array the new title array
+	 * @return array the new title array
 	 */
 	function update( $new, $old ) {
 		$instance = $old;
@@ -104,7 +104,7 @@ class FCC_Refine_Widget extends WP_Widget {
      * @param string $termlink the original link
      * @param array $term the term object
      * @param string $taxonomy the taxonomy slug
-     * @returns string the modified link
+     * @return string the modified link
      */
     function term_link_filter( $termlink, $term, $taxonomy ) {
     	$tax = get_taxonomy( $taxonomy );
@@ -116,30 +116,57 @@ class FCC_Refine_Widget extends WP_Widget {
      * @param array $terms the original terms list
      * @param array $taxonomies the taxonomy
      * @param array $args args originally passed
-     * @returns array the modified terms list
+     * @return array the modified terms list
      */
     function get_terms_filter( $terms, $taxonomies, $args ) {
     	global $wp_query;
+    	
+    	$tax_query = $wp_query->tax_query->queries;
+    	$tax_query['relationship'] = 'AND';
     	
     	//safe to assume one because filter is added immediately before use
     	$tax = get_taxonomy( $taxonomies[0] );
     	
     	foreach ( $terms as $id => &$term ) {
-    	
-			//appened this query to wp_query and count the number of posts returned
-    		$args = $wp_query->query;
-			$args[ $tax->name ] = $term->slug;
-			$query = new WP_Query( $args );
 
-				//If this term has no posts, don't display the link
-				if ( !$query->found_posts )
-					unset( $terms[ $id ] );
-				else 		
-					$terms[$id]->count = $query->found_posts;
+			$tax_query[] =	array( 	
+    							'taxonomy' 	=> 	$tax->name,
+    							'field' 	=> 	'slug',
+    							'terms'		=> 	$term->slug,
+    							);
+    							
+			$query = new WP_Query( array( 'tax_query' => $tax_query ) );
+
+			//If this term has no posts, don't display the link
+			if ( !$query->found_posts )
+				unset( $terms[ $id ] );
+			else 		
+				$terms[$id]->count = $query->found_posts;
 			
     	}
     
     	return $terms;
+    }
+    
+    /**
+     * Checks the global WP_Query Object to see if the taxonomy query is being queried
+     * Used to prevent already filtered taxonomies from being displayed
+     * @param string $tax the taxonomy slug
+     * @return bool true if in the query, otherwise false
+     * @since 1.4
+     */
+    function tax_in_query( $tax ) {
+    	global $wp_query;
+    	
+    	if ( !isset( $wp_query->tax_query ) || !isset( $wp_query->tax_query->queries ) )
+    		return false;
+    	
+    	foreach ( $wp_query->tax_query->queries as $query )
+    		if ( $query['taxonomy'] == $tax )
+    			return true;
+    			
+    	return false;
+    	
     }
 }
 
