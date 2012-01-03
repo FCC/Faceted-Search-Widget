@@ -16,7 +16,7 @@ class FCC_Refine_Widget extends WP_Widget {
 			'title' => '',
 			'depth' => '0',
 			'contentdiv' => false,
-			'orderby' => 'count',
+			'orderby' => 'name',
 		);
 		
 	/**
