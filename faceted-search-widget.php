@@ -3,7 +3,7 @@
 Plugin Name: Faceted Search Widget
 Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.5
+Version: 1.6
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2
@@ -11,12 +11,23 @@ License: GPL2
 
 
 class FCC_Refine_Widget extends WP_Widget {
+
+	private $defaults = array(
+			'title' => '',
+			'depth' => '0',
+			'contentdiv' => false,
+			'orderby' => 'count',
+		);
 		
 	/**
 	 * Constructor
 	 */
 	Function FCC_Refine_Widget() {
 	    parent::WP_Widget(false, $name = 'Faceted Search Widget');
+	    
+	    //can't i18n outside of function
+	    $this->defaults['title'] = __( 'Refine', 'faceted-search-widget' );
+	    	    
 	}
 
 	/**
@@ -30,10 +41,19 @@ class FCC_Refine_Widget extends WP_Widget {
 		if ( is_404() || is_single() || is_attachment() || is_page() )
 			return;
 
+		if ( $instance['contentdiv'] ) : ?>
+		<script>
+		faceted_search_widget = <?php echo json_encode( array( '.' . $this->widget_options['classname'], $instance['contentdiv'] ) ); ?>;
+		jQuery(document).ready(function(a){a(faceted_search_widget[0]+" a").live("click",function(d){d.preventDefault();var b=a(this).attr("href");a.each(faceted_search_widget,function(b,e){a(e).animate({opacity:0})});a.ajax({url:b,context:document.body,success:function(d){var e=a("<div />").append(d.replace(/<script(.|\s)*?\/script>/g,""));a.each(faceted_search_widget,function(b,c){a(c).html(a(e).find(c).html())});a.each(faceted_search_widget,function(b,c){a(c).animate({opacity:1})});history.pushState({page:b},
+b,b)}});return!1})});
+		</script>
+		<?php
+		endif;
+
 		//grab widget args and wp_query
 		global $wp_query;
 		extract( $args ); 
-		
+
 		$title = apply_filters( 'widget_title', $instance['title'] );
         ?>
 			<?php echo $before_widget; ?>
@@ -67,8 +87,10 @@ class FCC_Refine_Widget extends WP_Widget {
 		
 		wp_list_categories( array( 
 								'taxonomy' => $tax->name, 
-								'show_count' => true, 
+								'show_count' => true,
+								'depth' => $instance['depth'],
 								'title_li' => $tax->labels->name,
+								'orderby' => $instance['orderby'],
 							) );
 
 		remove_filter( 'term_link', array( &$this, 'term_link_filter' ) );
@@ -88,6 +110,9 @@ class FCC_Refine_Widget extends WP_Widget {
 	function update( $new, $old ) {
 		$instance = $old;
 		$instance['title'] = strip_tags( $new['title'] );
+		$instance['contentdiv'] = strip_tags( $new['contentdiv'] );
+		$instance['depth'] = (int) $new['depth'];
+		$instance['orderby'] = $new['orderby'];
         return $instance;
 	}
 	
@@ -95,12 +120,36 @@ class FCC_Refine_Widget extends WP_Widget {
 	 * Callback to generate the title form for widgets.php
 	 * @param reference $instance the widget instance
 	 */
-	function form( $instance ) {
-        $title = esc_attr( $instance['title'] ); ?>
+	function form( $instance ) { 
+	
+		foreach ( $this->defaults as $key => $value )
+			if ( !isset( $instance[ $key ] ) )
+				$instance[ $key ] = $value;
+	?>
          <p>
-          <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label> 
-          <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
+          <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'faceted-search-widget' ); ?></label> 
+          <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr( $instance['title'] ); ?>" /><br />
+          <span class="description"><?php _e( 'Title to display above the widget', 'faceted-search-widget' ); ?></span>
         </p>
+        <p>
+          <label for="<?php echo $this->get_field_id('depth'); ?>"><?php _e('Depth:', 'faceted-search-widget' ); ?></label> 
+          <input class="small-text" id="<?php echo $this->get_field_id('depth'); ?>" name="<?php echo $this->get_field_name('depth'); ?>" type="text" value="<?php echo esc_attr( $instance['depth'] );; ?>" /><br />
+          <span class="description"><?php _e( 'Number of levels to show at a time within hierarchical taxonomies like categories', 'faceted-search-widget' ); ?></span>
+        </p>
+        <p>
+        	<label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order terms by:', 'faceted-search-widget' ); ?></label>
+        	<select class="widefat" id="<?php echo $this->get_field_id('orderby'); ?>" name="<?php echo $this->get_field_name('orderby'); ?>">
+        		<?php foreach ( array( 'name' => __( 'Name', 'faceted-search-widget' ), 'count' => __( 'Count', 'faceted-search-widget' )) as $option => $label ) { ?>
+        			<option value="<?php echo $option; ?>" <?php selected( $option, $instance['orderby'] ); ?>><?php echo $label; ?></option>
+        		<?php } ?>
+        	</select>
+        </p>
+        <p>
+          <label for="<?php echo $this->get_field_id('contentdiv'); ?>"><?php _e('Content Div:', 'faceted-search-widget' ); ?></label> 
+          <input class="widefat" id="<?php echo $this->get_field_id('contentdiv'); ?>" name="<?php echo $this->get_field_name('contentdiv'); ?>" type="text" value="<?php echo esc_attr( $instance['contentdiv'] );; ?>" /><br />
+          <span class="description"><?php _e( 'jQuery selector of DIV containing your template\'s posts, leave blank to disable ajax search', 'faceted-search-widget' ); ?></span>
+        </p>
+        
         <?php 
     }
     

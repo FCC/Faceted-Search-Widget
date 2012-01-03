@@ -24,6 +24,11 @@ Used for internal FCC project and open sourced July, 2011.
 
 == Changelog ==
 
+= 1.6 =
+* Option to specify maximum depth for hierarchical taxonomies
+* Option to sort by number of posts (rather than alphabetically)
+* Optional Ajax loading of results with `history.pushState()` where supported
+
 = 1.5 =
 * Fixed bug where plugin would generate MySQL errors if taxonomy had large number of terms (scalability)
 * Plugin now supports faceted search within the children of a hierarchical taxonomy term
