@@ -24,6 +24,10 @@ Used for internal FCC project and open sourced July, 2011.
 
 == Changelog ==
 
+= 1.5 =
+* Fixed bug where plugin would generate MySQL errors if taxonomy had large number of terms (scalability)
+* Plugin now supports faceted search within the children of a hierarchical taxonomy term
+
 = 1.4 =
 * Fixed bug where post count would not display properly when browsing within a facet
 * More robust handling of queries when filtering by multiple taxonomies

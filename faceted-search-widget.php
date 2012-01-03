@@ -3,7 +3,7 @@
 Plugin Name: Faceted Search Widget
 Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.4
+Version: 1.5
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2
@@ -11,7 +11,7 @@ License: GPL2
 
 
 class FCC_Refine_Widget extends WP_Widget {
-	
+		
 	/**
 	 * Constructor
 	 */
@@ -25,7 +25,7 @@ class FCC_Refine_Widget extends WP_Widget {
 	 * @param reference $instance the widget instance
 	 */
 	function widget( $args, $instance ) {
-
+    
 		//verify that this is either an archive or search results
 		if ( is_404() || is_single() || is_attachment() || is_page() )
 			return;
@@ -40,23 +40,29 @@ class FCC_Refine_Widget extends WP_Widget {
 				<?php if ( $title )
 					echo $before_title . $title . $after_title;
 
-		$taxs = get_taxonomies( null,  'objects' ); ?>
+		$taxs = get_taxonomies( array( 'public' => true, 'query_var' => true ),  'objects' ); ?>
 		<ul>
 		<?php foreach ($taxs as $tax) { 
-				
-		//If user has already filterd by this taxonomy, do not display
-		if ( $this->tax_in_query( $tax->name ) )
+
+		//Non-Hierarchical taxonomy with term already filtered (no futher filtering)
+		if ( !$tax->hierarchical && $this->tax_in_query( $tax->name ) ) {
 			continue;
-		
-		//verify taxonomy is public and queryable
-		if ( !$tax->query_var || !$tax->public )
-			continue;
+			
+		//Hierarchical taxonomy with term filtered (filter down to children)
+		} else if ( $tax->hierarchical && $this->tax_in_query( $tax->name ) ) {
+			$termID = term_exists( get_query_var( $tax->query_var ) );
+			$terms = get_terms( $tax->name, array( 'child_of' => $termID ) );
+			
+		//No filters, get all terms
+		} else {
+			$terms = get_terms( $tax->name );
+		}	
+
 
 		//verify taxonomy has terms associated with it
-		$terms = get_terms( $tax->name );
 		if ( sizeof( $terms ) == 0)
 			continue;
-
+		
 		add_filter( 'term_link', array( &$this, 'term_link_filter'), 10, 3 );
 		add_filter( 'get_terms', array( &$this, 'get_terms_filter'), 10, 3 );
 		
@@ -119,15 +125,16 @@ class FCC_Refine_Widget extends WP_Widget {
      * @return array the modified terms list
      */
     function get_terms_filter( $terms, $taxonomies, $args ) {
+    	  
     	global $wp_query;
-    	
-    	$tax_query = $wp_query->tax_query->queries;
-    	$tax_query['relationship'] = 'AND';
-    	
+
     	//safe to assume one because filter is added immediately before use
     	$tax = get_taxonomy( $taxonomies[0] );
     	
     	foreach ( $terms as $id => &$term ) {
+    	
+	    	$tax_query = $wp_query->tax_query->queries;
+    		$tax_query['relationship'] = 'AND';
 
 			$tax_query[] =	array( 	
     							'taxonomy' 	=> 	$tax->name,
