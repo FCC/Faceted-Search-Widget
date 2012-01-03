@@ -58,9 +58,8 @@ class FCC_Refine_Widget extends WP_Widget {
 			$terms = get_terms( $tax->name );
 		}	
 
-
 		//verify taxonomy has terms associated with it
-		if ( sizeof( $terms ) == 0)
+		if ( sizeof( $terms ) == 0 )
 			continue;
 		
 		add_filter( 'term_link', array( &$this, 'term_link_filter'), 10, 3 );
