@@ -1,14 +1,12 @@
 <?php
 /*
 Plugin Name: Faceted Search Widget
-Plugin URI: http://
 Description: Sidebar Widget to allow filtering indexes by builtin and custom taxonomies
-Version: 1.6
+Version: 2.0
 Author: The Federal Communications Commission
 Author URI: http://fcc.gov/developers
 License: GPL2
 */
-
 
 class FCC_Refine_Widget extends WP_Widget {
 
@@ -23,13 +21,14 @@ class FCC_Refine_Widget extends WP_Widget {
 	 * Constructor
 	 */
 	Function FCC_Refine_Widget() {
+	
 	    parent::WP_Widget(false, $name = 'Faceted Search Widget');
 	    
 	    //can't i18n outside of function
 	    $this->defaults['title'] = __( 'Refine', 'faceted-search-widget' );
-	    	    
+	    	    	    
 	}
-
+	
 	/**
 	 * Widget to propegate sidebar list of taxonomies and terms
 	 * @param array $args args passed to widget
@@ -40,16 +39,20 @@ class FCC_Refine_Widget extends WP_Widget {
 		//verify that this is either an archive or search results
 		if ( is_404() || is_single() || is_attachment() || is_page() )
 			return;
-
-		if ( $instance['contentdiv'] ) : ?>
-		<script>
-		faceted_search_widget = <?php echo json_encode( array( '.' . $this->widget_options['classname'], $instance['contentdiv'] ) ); ?>;
-		jQuery(document).ready(function(a){a(faceted_search_widget[0]+" a").live("click",function(d){d.preventDefault();var b=a(this).attr("href");a.each(faceted_search_widget,function(b,e){a(e).animate({opacity:0})});a.ajax({url:b,context:document.body,success:function(d){var e=a("<div />").append(d.replace(/<script(.|\s)*?\/script>/g,""));a.each(faceted_search_widget,function(b,c){a(c).html(a(e).find(c).html())});a.each(faceted_search_widget,function(b,c){a(c).animate({opacity:1})});history.pushState({page:b},
-b,b)}});return!1})});
-		</script>
-		<?php
-		endif;
-
+	
+		//enqueue ajax scripts, if necessary
+		if ( $instance['contentdiv'] ) {
+		
+			$file = ( WP_DEBUG ) ? 'js/faceted-search-widget.dev.js' : 'js/faceted-search-widget.js';
+		
+			wp_enqueue_script( 'faceted-search-widget', plugins_url( $file, __FILE__ ), array( 'jquery' ), filemtime( dirname( __FILE__ ) . '/' . $file ), true );
+			
+			$data = array( '.' . $this->widget_options['classname'], $instance['contentdiv'] );
+			
+			wp_localize_script( 'faceted-search-widget', 'faceted_search_widget', $data );
+		
+		}
+	
 		//grab widget args and wp_query
 		global $wp_query;
 		extract( $args ); 
@@ -67,12 +70,12 @@ b,b)}});return!1})});
 		//Non-Hierarchical taxonomy with term already filtered (no futher filtering)
 		if ( !$tax->hierarchical && $this->tax_in_query( $tax->name ) ) {
 			continue;
-			
+						
 		//Hierarchical taxonomy with term filtered (filter down to children)
 		} else if ( $tax->hierarchical && $this->tax_in_query( $tax->name ) ) {
-			$termID = term_exists( get_query_var( $tax->query_var ) );
+			$termID = term_exists( get_query_var( $tax->query_var ) );			
 			$terms = get_terms( $tax->name, array( 'child_of' => $termID ) );
-			
+
 		//No filters, get all terms
 		} else {
 			$terms = get_terms( $tax->name );
@@ -91,6 +94,7 @@ b,b)}});return!1})});
 								'depth' => $instance['depth'],
 								'title_li' => $tax->labels->name,
 								'orderby' => $instance['orderby'],
+								'order' => ( $instance['orderby'] == 'count' ) ? 'DESC' : 'ASC', 
 							) );
 
 		remove_filter( 'term_link', array( &$this, 'term_link_filter' ) );
@@ -134,7 +138,7 @@ b,b)}});return!1})});
         <p>
           <label for="<?php echo $this->get_field_id('depth'); ?>"><?php _e('Depth:', 'faceted-search-widget' ); ?></label> 
           <input class="small-text" id="<?php echo $this->get_field_id('depth'); ?>" name="<?php echo $this->get_field_name('depth'); ?>" type="text" value="<?php echo esc_attr( $instance['depth'] );; ?>" /><br />
-          <span class="description"><?php _e( 'Number of levels to show at a time within hierarchical taxonomies like categories', 'faceted-search-widget' ); ?></span>
+          <span class="description"><?php _e( 'Maximum number of levels to show within hierarchical taxonomies like categories', 'faceted-search-widget' ); ?></span>
         </p>
         <p>
         	<label for="<?php echo $this->get_field_id('orderby'); ?>"><?php _e('Order terms by:', 'faceted-search-widget' ); ?></label>

@@ -1,0 +1,2 @@
+jQuery(document).ready(function(a){a(faceted_search_widget[0]+" a").live("click",function(d){d.preventDefault();var b=a(this).attr("href");a.each(faceted_search_widget,function(b,e){a(e).animate({opacity:0})});a.ajax({url:b,context:document.body,success:function(d){var e=a("<div />").append(d.replace(/<script(.|\s)*?\/script>/g,""));a.each(faceted_search_widget,function(b,c){a(c).html(a(e).find(c).html())});a.each(faceted_search_widget,function(b,c){a(c).animate({opacity:1})});history.pushState({page:b},
+b,b)}});return!1})});

@@ -1,4 +1,3 @@
-//unminified version of the ajax code inline within the widget
 jQuery(document).ready(function($){ 
 		
 	$(faceted_search_widget[0]+' a').live( 'click', function( event ){

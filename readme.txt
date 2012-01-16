@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: fcc
+Contributors: fcc, benbalter
 Donate link: 
 Tags: search, faceted search, .gov, gov, open gov, refine, widget
 Requires at least: 3.1
@@ -24,7 +24,7 @@ Used for internal FCC project and open sourced July, 2011.
 
 == Changelog ==
 
-= 1.6 =
+= 2.0 =
 * Option to specify maximum depth for hierarchical taxonomies
 * Option to sort by number of posts (rather than alphabetically)
 * Optional Ajax loading of results with `history.pushState()` where supported
